@@ -1,5 +1,6 @@
 // theme/ThemeProvider.tsx
-import React, { createContext, ReactNode, useContext, useState } from "react";
+import { useGameStore } from "@/game/state/game-store";
+import React, { createContext, ReactNode, useContext, useMemo } from "react";
 
 export type ThemeName = "dark" | "light" | "pink";
 
@@ -111,12 +112,15 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [themeName, setThemeName] = useState<ThemeName>("dark");
+  const themeName = useGameStore((s) => s.state.settings.themeName);
+  const setTheme = useGameStore((s) => s.actions.setTheme);
+
+  const theme = useMemo(() => themes[themeName], [themeName]);
 
   const value: ThemeContextValue = {
-    theme: themes[themeName],
+    theme,
     themeName,
-    setThemeName,
+    setThemeName: setTheme,
   };
 
   return (
@@ -126,8 +130,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error("useTheme must be used inside ThemeProvider");
-  }
+  if (!ctx) throw new Error("useTheme must be used inside ThemeProvider");
   return ctx;
 }

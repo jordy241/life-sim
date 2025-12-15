@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { useGameStore } from "@/game/state/game-store";
 import { Theme, ThemeName, useTheme } from "@/theme/ThemeProvider";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -6,6 +7,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 export default function SettingsScreen() {
   const { theme, themeName, setThemeName } = useTheme();
   const styles = createStyles(theme);
+  const resetGame = useGameStore((s) => s.actions.resetGame);
 
   const themes: ThemeName[] = ["dark", "light", "pink"];
 
@@ -37,6 +39,9 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </Card>
+        <Pressable onPress={resetGame}>
+          <Text>Reset save</Text>
+        </Pressable>
       </ScrollView>
     </View>
   );
