@@ -1,3 +1,5 @@
+// components/ui/card.tsx
+import { Theme, useTheme } from "@/theme/ThemeProvider";
 import React, { ReactNode } from "react";
 import { StyleSheet, Text, View, ViewProps } from "react-native";
 
@@ -7,6 +9,9 @@ interface CardProps extends ViewProps {
 }
 
 export function Card({ title, children, style, ...rest }: CardProps) {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   return (
     <View style={[styles.card, style]} {...rest}>
       {title ? <Text style={styles.title}>{title}</Text> : null}
@@ -15,20 +20,22 @@ export function Card({ title, children, style, ...rest }: CardProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#8D8D8DFF",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#E5E7EB",
-    marginBottom: 8,
-  },
-  content: {
-    // just space for children
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.radius.card,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    title: {
+      fontSize: 16,
+      fontWeight: "600",
+      color: theme.colors.text,
+      marginBottom: theme.spacing.sm,
+    },
+    content: {},
+  });
+}

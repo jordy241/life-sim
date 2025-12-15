@@ -1,17 +1,19 @@
-// app/(tabs)/index.tsx
 import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/ui/card";
-import { CharacterCard } from "@/components/ui/character-card"; // if you’re using it
+import { CharacterCard } from "@/components/ui/character-card";
 import type { Player } from "@/game/core/player";
 import { weeksToYears } from "@/game/core/time";
 import { createPlayer, nextWeek } from "@/game/systems/character-system";
+import { useTheme, type Theme } from "@/theme/ThemeProvider";
 
-const initialPlayer: Player = createPlayer("Jordy", []); // temp name
+const initialPlayer: Player = createPlayer("Jordy", []);
 
 export default function HomeScreen() {
   const [player, setPlayer] = useState<Player>(initialPlayer);
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
 
   const { years, weeks } = weeksToYears(player.ageInWeeks);
 
@@ -45,39 +47,41 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: "#111827",
-  },
-  container: {
-    padding: 16,
-  },
-  pageTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#F9FAFB",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#9CA3AF",
-    marginBottom: 16,
-  },
-  value: {
-    color: "#F9FAFB",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  button: {
-    marginTop: 8,
-    alignSelf: "flex-start",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "#FACC15",
-  },
-  buttonText: {
-    color: "#111827",
-    fontWeight: "600",
-  },
-});
+function createStyles(theme: Theme) {
+  return StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    container: {
+      padding: theme.spacing.md,
+    },
+    pageTitle: {
+      fontSize: 28,
+      fontWeight: "700",
+      color: theme.colors.text,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: theme.colors.textMuted,
+      marginBottom: theme.spacing.md,
+    },
+    value: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    button: {
+      marginTop: theme.spacing.sm,
+      alignSelf: "flex-start",
+      paddingHorizontal: theme.spacing.md,
+      paddingVertical: theme.spacing.sm,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.primary,
+    },
+    buttonText: {
+      color: theme.colors.primaryText,
+      fontWeight: "600",
+    },
+  });
+}

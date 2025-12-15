@@ -1,19 +1,25 @@
+import { useTheme, type Theme } from "@/theme/ThemeProvider";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 
-import Ionicons from "@expo/vector-icons/Ionicons";
-
 export default function TabLayout() {
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#9BDAFFFF",
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textMuted,
         headerStyle: {
-          backgroundColor: "#25292e",
+          backgroundColor: theme.colors.chrome,
         },
         headerShadowVisible: false,
-        headerTintColor: "#fff",
+        headerTintColor: theme.colors.text,
         tabBarStyle: {
-          backgroundColor: "#1C416EFF",
+          backgroundColor: theme.colors.chrome,
+          borderTopColor: theme.colors.border,
+          borderTopWidth: 1,
         },
       }}
     >
@@ -31,14 +37,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="about"
+        name="settings"
         options={{
-          title: "About",
+          title: "Settings",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={
-                focused ? "information-circle" : "information-circle-outline"
-              }
+              name={focused ? "settings" : "settings-outline"}
               color={color}
               size={24}
             />
@@ -47,4 +51,9 @@ export default function TabLayout() {
       />
     </Tabs>
   );
+}
+
+function createStyles(theme: Theme) {
+  // currently not used, but handy if you later want custom tab/header content
+  return {};
 }
