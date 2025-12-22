@@ -10,6 +10,7 @@ import { ACTIONS } from "@/game/core/actions";
 import { weeksToYears } from "@/game/core/time";
 import { useGameStore } from "@/game/state/game-store";
 import { useTheme, type Theme } from "@/theme/ThemeProvider";
+import { router } from "expo-router";
 import { useState } from "react";
 
 export default function HomeScreen() {
@@ -29,9 +30,6 @@ export default function HomeScreen() {
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.pageTitle}>Life Sim</Text>
-        <Text style={styles.subtitle}>Week {currentWeek}</Text>
-
         <CharacterCard
           name={player.name}
           avatar={require("../../assets/images/avatar.png")}
@@ -48,12 +46,26 @@ export default function HomeScreen() {
           </Text>
         </Card>
 
+        <PillButton
+          title="Next week"
+          subtitle="Choose what you do this week"
+          left={<Text style={{ fontSize: 16 }}>📅</Text>}
+          onPress={() => setActionDialogOpen(true)}
+        />
+
         <Card title="Actions">
           <PillButton
             title="Next week"
             subtitle="Choose what you do this week"
             left={<Text style={{ fontSize: 16 }}>📅</Text>}
             onPress={() => setActionDialogOpen(true)}
+          />
+          <PillButton
+            title="Settings"
+            subtitle="Theme, preferences, etc."
+            nextArrow
+            left={<Text style={{ fontSize: 16 }}>⚙️</Text>}
+            onPress={() => router.push("/(tabs)/settings")}
           />
         </Card>
 

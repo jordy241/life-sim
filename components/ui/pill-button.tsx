@@ -1,4 +1,5 @@
 import { useTheme, type Theme } from "@/theme/ThemeProvider";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View, ViewStyle } from "react-native";
 
@@ -7,6 +8,7 @@ interface PillButtonProps {
   subtitle?: string;
   left?: ReactNode;
   right?: ReactNode;
+  nextArrow?: boolean; // ✅ new
   onPress: () => void;
   disabled?: boolean;
   style?: ViewStyle;
@@ -17,12 +19,23 @@ export function PillButton({
   subtitle,
   left,
   right,
+  nextArrow,
   onPress,
   disabled,
   style,
 }: PillButtonProps) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
+
+  const rightContent =
+    right ??
+    (nextArrow ? (
+      <Ionicons
+        name="chevron-forward"
+        size={18}
+        color={theme.colors.textMuted}
+      />
+    ) : null);
 
   return (
     <Pressable
@@ -36,7 +49,11 @@ export function PillButton({
       ]}
     >
       <View style={styles.inner}>
-        {left ? <View style={styles.left}>{left}</View> : null}
+        {left ? (
+          <View style={styles.left}>{left}</View>
+        ) : (
+          <View style={styles.leftPlaceholder} />
+        )}
 
         <View style={styles.text}>
           <Text style={styles.title} numberOfLines={1}>
@@ -50,7 +67,11 @@ export function PillButton({
           ) : null}
         </View>
 
-        {right ? <View style={styles.right}>{right}</View> : null}
+        {rightContent ? (
+          <View style={styles.right}>{rightContent}</View>
+        ) : (
+          <View style={styles.rightPlaceholder} />
+        )}
       </View>
     </Pressable>
   );
@@ -86,6 +107,9 @@ function createStyles(theme: Theme) {
       alignItems: "center",
       justifyContent: "center",
     },
+    leftPlaceholder: {
+      width: 34,
+    },
     text: {
       flex: 1,
     },
@@ -103,6 +127,9 @@ function createStyles(theme: Theme) {
       minWidth: 34,
       alignItems: "center",
       justifyContent: "center",
+    },
+    rightPlaceholder: {
+      minWidth: 34,
     },
   });
 }

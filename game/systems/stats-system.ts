@@ -4,7 +4,7 @@ import type { Player } from "@/game/core/player";
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
 
-type StatDelta = Partial<{
+export type StatDelta = Partial<{
   vitals: Partial<StatBlock["vitals"]>;
   mind: Partial<StatBlock["mind"]>;
   social: Partial<StatBlock["social"]>;
