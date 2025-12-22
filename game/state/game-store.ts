@@ -1,9 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 
+import type { ActionId } from "@/game/core/actions";
 import type { Player } from "@/game/core/player";
-import { createPlayer, nextWeek as advancePlayerWeek } from "@/game/systems/character-system";
+import { applyAction } from "@/game/systems/action-system";
+import {
+  nextWeek as advancePlayerWeek,
+  createPlayer,
+} from "@/game/systems/character-system";
 import type { ThemeName } from "@/theme/ThemeProvider";
 
 export type GameProgress = {
@@ -31,6 +36,7 @@ type GameActions = {
   setPlayerName: (name: string) => void;
 
   setTheme: (themeName: ThemeName) => void;
+  advanceWeekWithAction: (actionId: ActionId) => void;
 };
 
 type GameStore = {
@@ -41,7 +47,7 @@ type GameStore = {
 const createInitialState = (): GameStoreState => ({
   progress: {
     currentWeek: 0,
-    player: createPlayer("Jordy", []),
+    player: createPlayer("Kato", []),
   },
   settings: {
     themeName: "dark",
@@ -96,6 +102,24 @@ export const useGameStore = create<GameStore>()(
               settings: {
                 ...state.settings,
                 themeName,
+              },
+            },
+          });
+        },
+        advanceWeekWithAction: (actionId: ActionId) => {
+          const { state } = get();
+
+          const updatedPlayer = applyAction(state.progress.player, actionId);
+
+          set({
+            state: {
+              ...state,
+              progress: {
+                currentWeek: state.progress.currentWeek + 1,
+                player: {
+                  ...updatedPlayer,
+                  ageInWeeks: updatedPlayer.ageInWeeks + 1,
+                },
               },
             },
           });
