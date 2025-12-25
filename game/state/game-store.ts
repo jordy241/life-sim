@@ -2,18 +2,28 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
+import { BASE_EVENTS } from "@/game/content/events/base-events";
 import type { ActionId } from "@/game/core/actions";
+import type { GameEvent } from "@/game/core/events";
 import type { Player } from "@/game/core/player";
 import { applyAction } from "@/game/systems/action-system";
 import {
   nextWeek as advancePlayerWeek,
   createPlayer,
 } from "@/game/systems/character-system";
+import { getEventById, pickWeeklyEventIds } from "@/game/systems/events-system";
+import { applyStatDelta } from "@/game/systems/stats-system";
 import type { ThemeName } from "@/theme/ThemeProvider";
+
+export type WeekState = {
+  pendingEventIds: string[]; // ids for this week
+  activeEventId: string | null; // currently shown event
+};
 
 export type GameProgress = {
   currentWeek: number;
   player: Player;
+  weekState: WeekState;
 };
 
 export type AppSettings = {
@@ -37,6 +47,12 @@ type GameActions = {
 
   setTheme: (themeName: ThemeName) => void;
   advanceWeekWithAction: (actionId: ActionId) => void;
+
+  /**
+   * Picks an option for the currently active event.
+   * Applies its stat delta, then advances to the next event in the week's queue.
+   */
+  chooseEventOption: (optionId: string) => void;
 };
 
 type GameStore = {
@@ -44,10 +60,17 @@ type GameStore = {
   actions: GameActions;
 };
 
+// Later: append more pools here (e.g. MUSIC_EVENTS) depending on player careers.
+const ALL_EVENT_POOLS: GameEvent[] = [...BASE_EVENTS];
+
 const createInitialState = (): GameStoreState => ({
   progress: {
     currentWeek: 0,
     player: createPlayer("Kato", []),
+    weekState: {
+      pendingEventIds: [],
+      activeEventId: null,
+    },
   },
   settings: {
     themeName: "dark",
@@ -62,13 +85,71 @@ export const useGameStore = create<GameStore>()(
       actions: {
         nextWeek: () => {
           const { state } = get();
+
+          const player = advancePlayerWeek(state.progress.player);
+
+          // Pick 2 random events for this week (tweak count whenever you want)
+          const pendingEventIds = pickWeeklyEventIds(
+            player,
+            ALL_EVENT_POOLS,
+            2
+          );
+          const activeEventId = pendingEventIds[0] ?? null;
+
           set({
             state: {
               ...state,
               progress: {
                 ...state.progress,
                 currentWeek: state.progress.currentWeek + 1,
-                player: advancePlayerWeek(state.progress.player),
+                player,
+                weekState: {
+                  pendingEventIds,
+                  activeEventId,
+                },
+              },
+            },
+          });
+        },
+
+        chooseEventOption: (optionId: string) => {
+          const { state } = get();
+
+          const activeEventId = state.progress.weekState.activeEventId;
+          if (!activeEventId) return;
+
+          const event = getEventById(
+            activeEventId,
+            state.progress.player,
+            ALL_EVENT_POOLS
+          );
+          if (!event) return;
+
+          const option = event.options.find((o) => o.id === optionId);
+          if (!option) return;
+
+          if (option.canPick && !option.canPick(state.progress.player)) return;
+
+          const delta =
+            typeof option.delta === "function"
+              ? option.delta(state.progress.player)
+              : option.delta;
+          const updatedPlayer = applyStatDelta(state.progress.player, delta);
+
+          const queue = state.progress.weekState.pendingEventIds;
+          const idx = queue.indexOf(activeEventId);
+          const nextId = idx >= 0 ? queue[idx + 1] ?? null : null;
+
+          set({
+            state: {
+              ...state,
+              progress: {
+                ...state.progress,
+                player: updatedPlayer,
+                weekState: {
+                  ...state.progress.weekState,
+                  activeEventId: nextId,
+                },
               },
             },
           });
@@ -106,6 +187,7 @@ export const useGameStore = create<GameStore>()(
             },
           });
         },
+
         advanceWeekWithAction: (actionId: ActionId) => {
           const { state } = get();
 
@@ -115,10 +197,16 @@ export const useGameStore = create<GameStore>()(
             state: {
               ...state,
               progress: {
+                ...state.progress,
                 currentWeek: state.progress.currentWeek + 1,
                 player: {
                   ...updatedPlayer,
                   ageInWeeks: updatedPlayer.ageInWeeks + 1,
+                },
+                // If this flow skips the event system, we clear the current week's event queue.
+                weekState: {
+                  pendingEventIds: [],
+                  activeEventId: null,
                 },
               },
             },

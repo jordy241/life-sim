@@ -1,5 +1,6 @@
 // app/(tabs)/index.tsx
-import React from "react";
+import { router } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { Card } from "@/components/ui/card";
@@ -10,8 +11,9 @@ import { ACTIONS } from "@/game/core/actions";
 import { weeksToYears } from "@/game/core/time";
 import { useGameStore } from "@/game/state/game-store";
 import { useTheme, type Theme } from "@/theme/ThemeProvider";
-import { router } from "expo-router";
-import { useState } from "react";
+
+import { BASE_EVENTS } from "@/game/content/events/base-events";
+import { getEventById } from "@/game/systems/events-system";
 
 export default function HomeScreen() {
   const { theme } = useTheme();
@@ -19,13 +21,38 @@ export default function HomeScreen() {
 
   const player = useGameStore((s) => s.state.progress.player);
   const currentWeek = useGameStore((s) => s.state.progress.currentWeek);
+
   const nextWeek = useGameStore((s) => s.actions.nextWeek);
+  const advanceWeek = useGameStore((s) => s.actions.advanceWeekWithAction);
+  const chooseEventOption = useGameStore((s) => s.actions.chooseEventOption);
+
+  const activeEventId = useGameStore(
+    (s) => s.state.progress.weekState.activeEventId
+  );
 
   const { years, weeks } = weeksToYears(player.ageInWeeks);
 
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
+  const [eventDialogOpen, setEventDialogOpen] = useState(false);
 
-  const advanceWeek = useGameStore((s) => s.actions.advanceWeekWithAction);
+  const activeEvent = useMemo(() => {
+    if (!activeEventId) return null;
+    return getEventById(activeEventId, player, BASE_EVENTS);
+  }, [activeEventId, player]);
+
+  // If an event becomes active (e.g. after pressing "Next week"),
+  // open the event dialog automatically.
+  useEffect(() => {
+    if (activeEventId) setEventDialogOpen(true);
+    else setEventDialogOpen(false);
+  }, [activeEventId]);
+
+  const isOptionDisabled = (option: {
+    canPick?: (p: typeof player) => boolean;
+  }) => {
+    if (!option.canPick) return false;
+    return !option.canPick(player);
+  };
 
   return (
     <View style={styles.root}>
@@ -46,20 +73,22 @@ export default function HomeScreen() {
           </Text>
         </Card>
 
-        <PillButton
-          title="Next week"
-          subtitle="Choose what you do this week"
-          left={<Text style={{ fontSize: 16 }}>📅</Text>}
-          onPress={() => setActionDialogOpen(true)}
-        />
-
         <Card title="Actions">
           <PillButton
             title="Next week"
             subtitle="Choose what you do this week"
             left={<Text style={{ fontSize: 16 }}>📅</Text>}
-            onPress={() => setActionDialogOpen(true)}
+            onPress={() => {
+              // If there is already an event active, show it.
+              // Otherwise, show the action picker like before.
+              if (activeEventId) {
+                setEventDialogOpen(true);
+              } else {
+                setActionDialogOpen(true);
+              }
+            }}
           />
+
           <PillButton
             title="Settings"
             subtitle="Theme, preferences, etc."
@@ -69,11 +98,24 @@ export default function HomeScreen() {
           />
         </Card>
 
+        {/* Action dialog (existing behavior) */}
         <Dialog
           visible={actionDialogOpen}
           title="What will you do this week?"
           onClose={() => setActionDialogOpen(false)}
         >
+          {/* Optional: quick shortcut to "Random events week" instead of a manual action */}
+          <PillButton
+            title="Let life happen"
+            subtitle="Trigger random events this week"
+            left={<Text style={{ fontSize: 16 }}>🎲</Text>}
+            onPress={() => {
+              // Close the action dialog, advance week, then event dialog opens via effect.
+              setActionDialogOpen(false);
+              nextWeek();
+            }}
+          />
+
           {ACTIONS.map((action) => (
             <PillButton
               key={action.id}
@@ -94,6 +136,48 @@ export default function HomeScreen() {
               }}
             />
           ))}
+        </Dialog>
+
+        {/* Event dialog (new) */}
+        <Dialog
+          visible={eventDialogOpen}
+          title={activeEvent?.title ?? "Event"}
+          onClose={() => setEventDialogOpen(false)}
+        >
+          {!activeEvent ? (
+            <Text style={styles.subtitle}>No active event.</Text>
+          ) : (
+            <>
+              <Text style={styles.subtitle}>{activeEvent.description}</Text>
+
+              {activeEvent.options.map((opt) => {
+                const disabled = isOptionDisabled(opt);
+
+                return (
+                  <PillButton
+                    key={opt.id}
+                    title={opt.label}
+                    subtitle={
+                      disabled
+                        ? "Not available right now"
+                        : "Choose this option"
+                    }
+                    left={
+                      <Text style={{ fontSize: 16 }}>
+                        {disabled ? "🔒" : "✨"}
+                      </Text>
+                    }
+                    onPress={() => {
+                      if (disabled) return;
+                      chooseEventOption(opt.id);
+                      // dialog stays open; it will update to next event automatically
+                      // and will close automatically when activeEventId becomes null (useEffect)
+                    }}
+                  />
+                );
+              })}
+            </>
+          )}
         </Dialog>
       </ScrollView>
     </View>
