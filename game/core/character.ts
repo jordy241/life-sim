@@ -7,13 +7,13 @@ export type VitalsStats = {
 };
 
 export type MindStats = {
-  happiness: number;  // 0-100
+  happiness: number; // 0-100
   confidence: number; // 0-100
   discipline: number; // 0-100
 };
 
 export type SocialStats = {
-  charisma: number;   // 0-100
+  charisma: number; // 0-100
   reputation: number; // 0-100
 };
 
@@ -31,9 +31,14 @@ export type StatBlock = {
 
 export type Trait = "ambitious" | "creative" | "lazy" | "social";
 
+export type LifeStage = "child" | "teen" | "young_adult" | "adult" | "senior";
+
 export interface Character {
   id: string;
   name: string;
+  ageInWeeks: number;
   stats: StatBlock;
   traits: Trait[];
+
+  lifeStage?: LifeStage;
 }

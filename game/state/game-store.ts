@@ -86,9 +86,10 @@ export const useGameStore = create<GameStore>()(
         nextWeek: () => {
           const { state } = get();
 
+          if (state.progress.weekState.activeEventId) return;
+
           const player = advancePlayerWeek(state.progress.player);
 
-          // Pick 2 random events for this week (tweak count whenever you want)
           const pendingEventIds = pickWeeklyEventIds(
             player,
             ALL_EVENT_POOLS,
@@ -134,11 +135,16 @@ export const useGameStore = create<GameStore>()(
             typeof option.delta === "function"
               ? option.delta(state.progress.player)
               : option.delta;
+
           const updatedPlayer = applyStatDelta(state.progress.player, delta);
 
+          // ✅ Consume from the front
           const queue = state.progress.weekState.pendingEventIds;
-          const idx = queue.indexOf(activeEventId);
-          const nextId = idx >= 0 ? queue[idx + 1] ?? null : null;
+          const nextQueue =
+            queue[0] === activeEventId
+              ? queue.slice(1)
+              : queue.filter((id) => id !== activeEventId);
+          const nextId = nextQueue[0] ?? null;
 
           set({
             state: {
@@ -147,7 +153,7 @@ export const useGameStore = create<GameStore>()(
                 ...state.progress,
                 player: updatedPlayer,
                 weekState: {
-                  ...state.progress.weekState,
+                  pendingEventIds: nextQueue,
                   activeEventId: nextId,
                 },
               },

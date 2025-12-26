@@ -15,6 +15,7 @@ export interface Theme {
     textMuted: string;
 
     chrome: string;
+    success: string;
   };
   radius: {
     card: number;
@@ -38,6 +39,7 @@ const darkTheme: Theme = {
     text: "#F9FAFB",
     textMuted: "#9CA3AF",
     chrome: "#020617",
+    success: "#22C55E",
   },
   radius: {
     card: 12,
@@ -61,6 +63,7 @@ const lightTheme: Theme = {
     text: "#111827",
     textMuted: "#6B7280",
     chrome: "#E5E7EB",
+    success: "#16A34A",
   },
   radius: {
     card: 12,
@@ -84,6 +87,7 @@ const pinkTheme: Theme = {
     text: "#1F2933", // dark text
     textMuted: "#9F7F92", // muted mauve/pink text
     chrome: "#FDE2E7",
+    success: "#10B981",
   },
   radius: {
     card: 12,

@@ -31,19 +31,19 @@ export function Dialog({ visible, title, children, onClose }: DialogProps) {
       {/* Dimmed background */}
       <View style={styles.backdrop}>
         {/* Tap outside to close (optional) */}
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <Pressable style={StyleSheet.absoluteFill} />
 
         {/* Dialog box */}
         <View style={styles.dialog}>
           {title ? <Text style={styles.title}>{title}</Text> : null}
 
           <View style={styles.content}>{children}</View>
-
+          {/* 
           <View style={styles.footer}>
             <Pressable style={styles.closeButton} onPress={onClose}>
               <Text style={styles.closeText}>Close</Text>
             </Pressable>
-          </View>
+          </View> */}
         </View>
       </View>
     </Modal>

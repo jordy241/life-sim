@@ -31,6 +31,7 @@ export function createPlayer(name: string, traits: Trait[] = []): Player {
   const base: Character = {
     id: createId(),
     name,
+    ageInWeeks: START_AGE_YEARS * WEEKS_PER_YEAR,
     stats: structuredClone(defaultStats),
     traits,
   };

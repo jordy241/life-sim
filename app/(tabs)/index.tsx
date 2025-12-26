@@ -71,6 +71,7 @@ export default function HomeScreen() {
           <Text style={styles.value}>
             {years} years, {weeks} weeks
           </Text>
+          <Text style={styles.success}>{player.stats.wealth.cash}$</Text>
         </Card>
 
         <Card title="Actions">
@@ -141,13 +142,33 @@ export default function HomeScreen() {
         {/* Event dialog (new) */}
         <Dialog
           visible={eventDialogOpen}
-          title={activeEvent?.title ?? "Event"}
           onClose={() => setEventDialogOpen(false)}
         >
           {!activeEvent ? (
             <Text style={styles.subtitle}>No active event.</Text>
           ) : (
             <>
+              {/* ✅ Header inside dialog */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                  marginBottom: 8,
+                }}
+              >
+                <Text style={{ fontSize: 22 }}>{activeEvent.icon ?? "✨"}</Text>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "700",
+                    color: theme.colors.text,
+                  }}
+                >
+                  {activeEvent.title}
+                </Text>
+              </View>
+
               <Text style={styles.subtitle}>{activeEvent.description}</Text>
 
               {activeEvent.options.map((opt) => {
@@ -157,14 +178,9 @@ export default function HomeScreen() {
                   <PillButton
                     key={opt.id}
                     title={opt.label}
-                    subtitle={
-                      disabled
-                        ? "Not available right now"
-                        : "Choose this option"
-                    }
                     left={
                       <Text style={{ fontSize: 16 }}>
-                        {disabled ? "🔒" : "✨"}
+                        {opt.icon ?? (disabled ? "🔒" : "✨")}
                       </Text>
                     }
                     onPress={() => {
@@ -203,6 +219,7 @@ function createStyles(theme: Theme) {
       borderRadius: theme.radius.pill,
       backgroundColor: theme.colors.primary,
     },
+    success: { color: theme.colors.success, fontSize: 16, fontWeight: "600" },
     buttonText: { color: theme.colors.primaryText, fontWeight: "600" },
     actionButton: {
       padding: theme.spacing.md,
