@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { CharacterCard } from "@/components/ui/character-card";
 import { Dialog } from "@/components/ui/dialog";
 import { PillButton } from "@/components/ui/pill-button";
-import { ACTIONS } from "@/game/core/actions";
 import { weeksToYears } from "@/game/core/time";
 import { useGameStore } from "@/game/state/game-store";
 import { useTheme, type Theme } from "@/theme/ThemeProvider";
@@ -23,7 +22,6 @@ export default function HomeScreen() {
   const currentWeek = useGameStore((s) => s.state.progress.currentWeek);
 
   const nextWeek = useGameStore((s) => s.actions.nextWeek);
-  const advanceWeek = useGameStore((s) => s.actions.advanceWeekWithAction);
   const chooseEventOption = useGameStore((s) => s.actions.chooseEventOption);
 
   const activeEventId = useGameStore(
@@ -32,7 +30,6 @@ export default function HomeScreen() {
 
   const { years, weeks } = weeksToYears(player.ageInWeeks);
 
-  const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [eventDialogOpen, setEventDialogOpen] = useState(false);
 
   const activeEvent = useMemo(() => {
@@ -80,12 +77,10 @@ export default function HomeScreen() {
             subtitle="Choose what you do this week"
             left={<Text style={{ fontSize: 16 }}>📅</Text>}
             onPress={() => {
-              // If there is already an event active, show it.
-              // Otherwise, show the action picker like before.
               if (activeEventId) {
                 setEventDialogOpen(true);
               } else {
-                setActionDialogOpen(true);
+                nextWeek();
               }
             }}
           />
@@ -106,46 +101,6 @@ export default function HomeScreen() {
             onPress={() => router.push("/(tabs)/settings")}
           />
         </Card>
-
-        {/* Action dialog (existing behavior) */}
-        <Dialog
-          visible={actionDialogOpen}
-          title="What will you do this week?"
-          onClose={() => setActionDialogOpen(false)}
-        >
-          {/* Optional: quick shortcut to "Random events week" instead of a manual action */}
-          <PillButton
-            title="Let life happen"
-            subtitle="Trigger random events this week"
-            left={<Text style={{ fontSize: 16 }}>🎲</Text>}
-            onPress={() => {
-              // Close the action dialog, advance week, then event dialog opens via effect.
-              setActionDialogOpen(false);
-              nextWeek();
-            }}
-          />
-
-          {ACTIONS.map((action) => (
-            <PillButton
-              key={action.id}
-              title={action.label}
-              subtitle={action.description}
-              left={
-                <Text style={{ fontSize: 16 }}>
-                  {action.id === "work"
-                    ? "💼"
-                    : action.id === "rest"
-                    ? "🛌"
-                    : "🧑‍🤝‍🧑"}
-                </Text>
-              }
-              onPress={() => {
-                advanceWeek(action.id);
-                setTimeout(() => setActionDialogOpen(false), 150);
-              }}
-            />
-          ))}
-        </Dialog>
 
         {/* Event dialog (new) */}
         <Dialog

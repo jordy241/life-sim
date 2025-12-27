@@ -3,10 +3,8 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import { BASE_EVENTS } from "@/game/content/events/base-events";
-import type { ActionId } from "@/game/core/actions";
 import type { GameEvent } from "@/game/core/events";
 import type { Player } from "@/game/core/player";
-import { applyAction } from "@/game/systems/action-system";
 import {
   nextWeek as advancePlayerWeek,
   createPlayer,
@@ -47,7 +45,6 @@ type GameActions = {
   setPlayerName: (name: string) => void;
 
   setTheme: (themeName: ThemeName) => void;
-  advanceWeekWithAction: (actionId: ActionId) => void;
 
   /**
    * Picks an option for the currently active event.
@@ -198,33 +195,6 @@ export const useGameStore = create<GameStore>()(
           });
         },
 
-        advanceWeekWithAction: (actionId: ActionId) => {
-          const { state } = get();
-
-          const updatedPlayer = applyAction(state.progress.player, actionId);
-
-          const nextPlayer = applyWeeklyJobPay({
-            ...updatedPlayer,
-            ageInWeeks: updatedPlayer.ageInWeeks + 1,
-          });
-
-          set({
-            state: {
-              ...state,
-              progress: {
-                ...state.progress,
-                currentWeek: state.progress.currentWeek + 1,
-                player: nextPlayer,
-                // If this flow skips the event system, we clear the current week's event queue.
-                weekState: {
-                  pendingEventIds: [],
-                  activeEventId: null,
-                },
-              },
-            },
-          });
-        },
-
         setJob: (roleId: string) =>
           set((s) => ({
             state: {
@@ -244,6 +214,18 @@ export const useGameStore = create<GameStore>()(
       name: "life-sim-store",
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (store) => ({ state: store.state }), // persist only data, not actions
+
+      // optional but nice when you change state shape
+      version: 1,
+
+      // ✅ DEV-only: wipe persisted store on startup
+      onRehydrateStorage: () => {
+        if (!__DEV__) return;
+
+        return async () => {
+          await AsyncStorage.removeItem("life-sim-store");
+        };
+      },
     }
   )
 );
