@@ -1,11 +1,5 @@
-# Impromptu draftboard
-
-- User can create a character
-- User can take a job
-- User can earn money
-- User can buy item with money
-- User can progress days/weeks/years
-
-
-# Ideas
-- Dating swiping like Tinder?
+# TODO
+1. Jobs
+2. Eduaction
+3. Implement education needing jobs
+4. Age linked to actions
