@@ -41,4 +41,6 @@ export interface Character {
   traits: Trait[];
 
   lifeStage?: LifeStage;
+
+  jobRoleId?: string;
 }

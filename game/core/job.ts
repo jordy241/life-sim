@@ -16,20 +16,6 @@ export type JobType =
   | "contractor"
   | "self_employed";
 
-export type JobIconKey =
-  | "Briefcase"
-  | "Coffee"
-  | "Wrench"
-  | "GraduationCap"
-  | "Hammer"
-  | "Stethoscope"
-  | "Laptop"
-  | "Paintbrush"
-  | "Store"
-  | "Truck"
-  | "Users"
-  | "Shield";
-
 export type WorkSchedule = "day" | "night" | "shift" | "flex";
 
 export type JobTag =
@@ -70,6 +56,7 @@ export type Pay = {
 export type JobRole = {
   id: string;
   title: string;
+  description: string;
   tags: JobTag[];
   type: JobType;
   schedule: WorkSchedule;
@@ -77,7 +64,7 @@ export type JobRole = {
   level: JobLevel;
   weeklyPay: Pay;
 
-  icon: JobIconKey;
+  icon: string;
 
   // Requirements/gating (keep it simple)
   minLifeStage?: LifeStage; // ex: "young_adult"

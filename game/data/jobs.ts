@@ -4,7 +4,8 @@ export const JOB_ROLES: JobRole[] = [
   {
     id: "job_unemployed",
     title: "Unemployed",
-    icon: "Users",
+    description: "Currently without a job.",
+    icon: "-",
     tags: [],
     type: "unemployed",
     schedule: "flex",
@@ -18,7 +19,8 @@ export const JOB_ROLES: JobRole[] = [
   {
     id: "job_barista_part_time",
     title: "Barista (Part-time)",
-    icon: "Coffee",
+    description: "Prepare and serve coffee and other beverages.",
+    icon: "☕",
     tags: ["service"],
     type: "part_time",
     schedule: "shift",
@@ -34,7 +36,8 @@ export const JOB_ROLES: JobRole[] = [
   {
     id: "job_junior_office",
     title: "Junior Office Assistant",
-    icon: "Briefcase",
+    description: "Assist with administrative tasks in an office setting.",
+    icon: "💼",
     tags: ["office"],
     type: "full_time",
     schedule: "day",

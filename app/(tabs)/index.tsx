@@ -91,6 +91,14 @@ export default function HomeScreen() {
           />
 
           <PillButton
+            title="Jobs"
+            subtitle="Browse all available jobs"
+            nextArrow
+            left={<Text style={{ fontSize: 16 }}>💼</Text>}
+            onPress={() => router.push("/(tabs)/jobs")}
+          />
+
+          <PillButton
             title="Settings"
             subtitle="Theme, preferences, etc."
             nextArrow

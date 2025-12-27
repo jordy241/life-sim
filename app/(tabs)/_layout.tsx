@@ -4,7 +4,6 @@ import { Tabs } from "expo-router";
 
 export default function TabLayout() {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
 
   return (
     <Tabs
@@ -43,6 +42,19 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "settings" : "settings-outline"}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="jobs"
+        options={{
+          title: "Jobs",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "briefcase" : "briefcase-outline"}
               color={color}
               size={24}
             />

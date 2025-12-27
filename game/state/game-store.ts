@@ -14,6 +14,7 @@ import {
 import { getEventById, pickWeeklyEventIds } from "@/game/systems/events-system";
 import { applyStatDelta } from "@/game/systems/stats-system";
 import type { ThemeName } from "@/theme/ThemeProvider";
+import { applyWeeklyJobPay } from "../systems/job-system";
 
 export type WeekState = {
   pendingEventIds: string[]; // ids for this week
@@ -53,6 +54,8 @@ type GameActions = {
    * Applies its stat delta, then advances to the next event in the week's queue.
    */
   chooseEventOption: (optionId: string) => void;
+
+  setJob: (roleId: string) => void;
 };
 
 type GameStore = {
@@ -88,7 +91,8 @@ export const useGameStore = create<GameStore>()(
 
           if (state.progress.weekState.activeEventId) return;
 
-          const player = advancePlayerWeek(state.progress.player);
+          let player = advancePlayerWeek(state.progress.player);
+          player = applyWeeklyJobPay(player);
 
           const pendingEventIds = pickWeeklyEventIds(
             player,
@@ -199,16 +203,18 @@ export const useGameStore = create<GameStore>()(
 
           const updatedPlayer = applyAction(state.progress.player, actionId);
 
+          const nextPlayer = applyWeeklyJobPay({
+            ...updatedPlayer,
+            ageInWeeks: updatedPlayer.ageInWeeks + 1,
+          });
+
           set({
             state: {
               ...state,
               progress: {
                 ...state.progress,
                 currentWeek: state.progress.currentWeek + 1,
-                player: {
-                  ...updatedPlayer,
-                  ageInWeeks: updatedPlayer.ageInWeeks + 1,
-                },
+                player: nextPlayer,
                 // If this flow skips the event system, we clear the current week's event queue.
                 weekState: {
                   pendingEventIds: [],
@@ -218,6 +224,20 @@ export const useGameStore = create<GameStore>()(
             },
           });
         },
+
+        setJob: (roleId: string) =>
+          set((s) => ({
+            state: {
+              ...s.state,
+              progress: {
+                ...s.state.progress,
+                player: {
+                  ...s.state.progress.player,
+                  jobRoleId: roleId,
+                },
+              },
+            },
+          })),
       },
     }),
     {
