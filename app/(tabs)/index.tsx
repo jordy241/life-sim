@@ -13,6 +13,7 @@ import { useTheme, type Theme } from "@/theme/ThemeProvider";
 
 import { BASE_EVENTS } from "@/game/content/events/base-events";
 import { getEventById } from "@/game/systems/events-system";
+import { getJobRoleById } from "@/game/systems/job-system";
 
 export default function HomeScreen() {
   const { theme } = useTheme();
@@ -20,6 +21,9 @@ export default function HomeScreen() {
 
   const player = useGameStore((s) => s.state.progress.player);
   const currentWeek = useGameStore((s) => s.state.progress.currentWeek);
+
+  const jobTitle = getJobRoleById(player.jobRoleId)?.title ?? "Unemployed";
+  const totalMoney = player.stats.wealth.cash - player.stats.wealth.debt;
 
   const nextWeek = useGameStore((s) => s.actions.nextWeek);
   const chooseEventOption = useGameStore((s) => s.actions.chooseEventOption);
@@ -62,46 +66,43 @@ export default function HomeScreen() {
             energy: player.stats.vitals.energy,
             happiness: player.stats.mind.happiness,
           }}
+          ageInWeeks={player.ageInWeeks}
+          jobTitle={jobTitle}
+          totalMoney={totalMoney}
         />
-
+        ;
         <Card title="Age">
           <Text style={styles.value}>
             {years} years, {weeks} weeks
           </Text>
           <Text style={styles.success}>{player.stats.wealth.cash}$</Text>
         </Card>
-
-        <Card title="Actions">
-          <PillButton
-            title="Next week"
-            subtitle="Choose what you do this week"
-            left={<Text style={{ fontSize: 16 }}>📅</Text>}
-            onPress={() => {
-              if (activeEventId) {
-                setEventDialogOpen(true);
-              } else {
-                nextWeek();
-              }
-            }}
-          />
-
-          <PillButton
-            title="Jobs"
-            subtitle="Browse all available jobs"
-            nextArrow
-            left={<Text style={{ fontSize: 16 }}>💼</Text>}
-            onPress={() => router.push("/(tabs)/jobs")}
-          />
-
-          <PillButton
-            title="Settings"
-            subtitle="Theme, preferences, etc."
-            nextArrow
-            left={<Text style={{ fontSize: 16 }}>⚙️</Text>}
-            onPress={() => router.push("/(tabs)/settings")}
-          />
-        </Card>
-
+        <PillButton
+          title="Next week"
+          subtitle="Choose what you do this week"
+          left={<Text style={{ fontSize: 16 }}>📅</Text>}
+          onPress={() => {
+            if (activeEventId) {
+              setEventDialogOpen(true);
+            } else {
+              nextWeek();
+            }
+          }}
+        />
+        <PillButton
+          title="Jobs"
+          subtitle="Browse all available jobs"
+          nextArrow
+          left={<Text style={{ fontSize: 16 }}>💼</Text>}
+          onPress={() => router.push("/(tabs)/jobs")}
+        />
+        <PillButton
+          title="Settings"
+          subtitle="Theme, preferences, etc."
+          nextArrow
+          left={<Text style={{ fontSize: 16 }}>⚙️</Text>}
+          onPress={() => router.push("/(tabs)/settings")}
+        />
         {/* Event dialog (new) */}
         <Dialog
           visible={eventDialogOpen}

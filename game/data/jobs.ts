@@ -18,7 +18,7 @@ export const JOB_ROLES: JobRole[] = [
   },
   {
     id: "job_barista_part_time",
-    title: "Barista (Part-time)",
+    title: "Barista",
     description: "Prepare and serve coffee and other beverages.",
     icon: "☕",
     tags: ["service"],

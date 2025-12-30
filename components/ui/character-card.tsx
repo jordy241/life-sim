@@ -3,10 +3,15 @@ import React from "react";
 import { Image, StyleSheet, Text, View, ViewProps } from "react-native";
 
 import { StatRing } from "@/components/ui/stat-ring";
+import { weeksToYears } from "@/game/core/time";
 
 interface CharacterCardProps extends ViewProps {
   name: string;
   avatar: any;
+
+  jobTitle: string;
+  totalMoney: number;
+  ageInWeeks: number;
 
   vitals: {
     health: number;
@@ -15,9 +20,18 @@ interface CharacterCardProps extends ViewProps {
   };
 }
 
+const EUR = new Intl.NumberFormat("nl-BE", {
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 0,
+});
+
 export function CharacterCard({
   name,
   avatar,
+  jobTitle,
+  totalMoney,
+  ageInWeeks,
   vitals,
   style,
   ...rest
@@ -25,15 +39,18 @@ export function CharacterCard({
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
+  const { years } = weeksToYears(ageInWeeks);
+
   return (
     <View style={[styles.card, style]} {...rest}>
-      {/* Avatar */}
       <Image source={avatar} style={styles.avatar} />
 
-      {/* Name */}
       <Text style={styles.name}>{name}</Text>
 
-      {/* Vital stats */}
+      <Text style={styles.meta}>
+        {jobTitle} - {EUR.format(totalMoney)} - {years} years old
+      </Text>
+
       <View style={styles.vitalsRow}>
         <StatRing value={vitals.health} label="Health" size={72} />
         <StatRing value={vitals.energy} label="Energy" size={72} />
@@ -64,6 +81,11 @@ function createStyles(theme: Theme) {
       fontSize: 18,
       fontWeight: "600",
       color: theme.colors.text,
+      marginBottom: 2,
+    },
+    meta: {
+      fontSize: 13,
+      color: (theme.colors as any).textMuted ?? theme.colors.text,
       marginBottom: theme.spacing.sm,
     },
     vitalsRow: {
